@@ -7,8 +7,12 @@ import org.apache.commons.io.FileUtils;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.text.InputType;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
@@ -28,16 +32,25 @@ public class ToDoActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_to_do);
-		etext = (EditText) findViewById(R.id.et_enteritem);
-
+		etext = (EditText) findViewById(R.id.et_enteritem);		
+		
+		// Set to TYPE_NULL on all Android API versions
+		etext.setInputType(InputType.TYPE_NULL);
+		// for later than GB only
+		if (android.os.Build.VERSION.SDK_INT >= 11) {
+		    // this fakes the TextView (which actually handles cursor drawing)
+		    // into drawing the cursor even though you've disabled soft input
+		    // with TYPE_NULL
+			etext.setRawInputType(InputType.TYPE_CLASS_TEXT);
+		}
+		
+		
 		lvitems = (ListView) findViewById(R.id.lv_todolist);
 		readItems();
 
 		itemAdapter = new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, items);
 		lvitems.setAdapter(itemAdapter);
-		items.add("First Item");
-		items.add("Second Item");
 		setupListViewListener();
 
 	}
@@ -101,6 +114,7 @@ public class ToDoActivity extends Activity {
 					.show();
 			etext.setText("");
 			this.items.add(addedEntry);
+			itemAdapter.notifyDataSetInvalidated();
 			saveItems();
 
 		}
